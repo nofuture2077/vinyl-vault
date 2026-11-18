@@ -321,6 +321,7 @@ footer { padding-block: 0 48px; color: var(--mute); font: 400 12px var(--mono); 
       <button class="linkbtn" id="change" type="button">Change collection</button>
       <button class="linkbtn" id="share" type="button">Share collection</button>
       <button class="linkbtn" id="tokBtn" type="button">Add Discogs token</button>
+      <button class="linkbtn" id="resetApp" type="button">Reset</button>
     </div>
     <form class="pick" id="pick" hidden>
       <input id="pickUrl" type="text" inputmode="url" autocomplete="off" spellcheck="false"
@@ -1123,6 +1124,14 @@ if (TOKEN) { $("#tokIn").hidden = true; $("#tok .btn[type=submit]").hidden = tru
   $("#tokHint").textContent = `A token for ${TOKEN.username} is saved on this device. ${OWNER ? "Values use Discogs' own collection value." : "Discogs' collection value only appears on that account's own collection."}`; }
 $("#tokBtn").onclick = () => { showForm("#tok", $("#tok").hidden); if (!TOKEN) $("#tokIn").focus(); };
 $("#tokOff").onclick = () => { ls.del(TOKEN_KEY); ls.del(VALUE_KEY); location.reload(); };
+// Forget everything this page keeps on the device: the collection, the token, cached
+// records, prices and view settings. Only the rate-limit window stays, because Discogs
+// still counts those requests.
+$("#resetApp").onclick = () => {
+  if (!confirm("Reset Vinyl Vault on this device?\n\nThis forgets the collection, your Discogs token, and all cached records and prices.")) return;
+  try { for (const k of Object.keys(localStorage)) if (/^vinyl[-:]/.test(k) && k !== RATE_KEY) localStorage.removeItem(k); } catch {}
+  location.assign(location.pathname);
+};
 $("#tok").addEventListener("submit", async (e) => {
   e.preventDefault();
   const token = $("#tokIn").value.trim(), hint = $("#tokHint");
