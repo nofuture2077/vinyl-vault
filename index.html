@@ -400,7 +400,7 @@ const SHARED = !!fromUrl && !(mine && same(mine.user, fromUrl.user));
 const USER = COLL ? COLL.user : "";
 const OWNER = !!TOKEN && same(TOKEN.username, USER);
 // Bump the version when parsing changes, so stale cached data isn't shown.
-const CACHE_KEY = `vinyl:v1:${USER.toLowerCase()}`, CACHE_MS = 6 * 3600e3;
+const CACHE_KEY = `vinyl:v2:${USER.toLowerCase()}`, CACHE_MS = 6 * 3600e3;
 const PRICE_KEY = "vinyl-prices:v1", PRICE_MS = 3 * 86400e3;
 const VALUE_KEY = `vinyl-value:v1:${USER.toLowerCase()}`;
 
@@ -727,9 +727,11 @@ function parseRelease(it) {
   const b = it.basic_information || {};
   const fm = b.formats || [];
   const main = fm.find((f) => f.name !== "Box Set" && f.name !== "All Media") || fm[0] || { name: "" };
-  const desc = fm.flatMap((f) => f.descriptions || []);
+  // A release can hold several discs ("LP + Flexi-disc, Picture Disc"). The record drawn,
+  // its color, effect and speed all come from the first one.
   const mainDesc = main.descriptions || [];
-  const text = fm.map((f) => f.text || "").join(" ");
+  const desc = mainDesc;
+  const text = main.text || "";
   const disc = DISC[main.name] || "";
   const qty = parseInt(main.qty, 10) || 1;
   const size = ['12"', '10"', '7"'].find((s) => mainDesc.includes(s)) || "";
